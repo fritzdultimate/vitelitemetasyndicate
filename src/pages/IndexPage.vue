@@ -81,7 +81,7 @@
             
 
         } else {
-            alert('Please install MetaMask');
+            showNotif('top',  { color: 'negative', message: 'Please install MetaMask', icon: 'report_problem' })
         }
 
         if(ethereum.isConnected) {
