@@ -43,9 +43,15 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="MuiBox-root jss49 col-12">
-                            <button class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-containedSizeLarge MuiButton-sizeLarge MuiButton-fullWidth" tabindex="0" type="button">
+                        <div class="MuiBox-root jss49 col-12" v-if="!metamaskConnected">
+                            <button class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-containedSizeLarge MuiButton-sizeLarge MuiButton-fullWidth" tabindex="0" type="button" id="wallet_connect" @click="connect">
                                 <span class="MuiButton-label text-white text-bold">Connect wallet </span>
+                                <span class="MuiTouchRipple-root"></span>
+                            </button>
+                        </div>
+                        <div class="MuiBox-root jss49 col-12" v-if="metamaskConnected">
+                            <button class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-containedSizeLarge MuiButton-sizeLarge MuiButton-fullWidth" tabindex="0" type="button" id="wallet_connect" @click="mint">
+                                <span class="MuiButton-label text-white text-bold">Mint </span>
                                 <span class="MuiTouchRipple-root"></span>
                             </button>
                         </div>
@@ -58,18 +64,141 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+    import { ref, computed, onMounted } from 'vue'
+    import detectEthereumProvider from '@metamask/detect-provider';
+    import { ethers } from 'ethers';
+    import { useQuasar } from 'quasar'
 
-const quantity = ref(1);
-const amount = computed(() => quantity.value * 0.03)
+    const $q = useQuasar()
 
-function incrementQuantity () {
-    quantity.value  = quantity.value < 10 ? quantity.value+1 : quantity.value;
-}
+    const metamaskConnected = ref(false)
 
-function decrementQuantity () {
-    quantity.value  = quantity.value > 1 ? quantity.value-1 : quantity.value;
-}
+    onMounted( async () => {
+        console.log(ethereum.selectedAddress)
+        const provider = await detectEthereumProvider();
+
+        if(provider) {
+            
+
+        } else {
+            alert('Please install MetaMask');
+        }
+
+        if(ethereum.isConnected) {
+            metamaskConnected.value = true;
+        }
+    })
+
+    let currentAccount = null;
+    ethereum
+        .request({ method: 'eth_accounts' })
+        .then(handleAccountsChanged)
+        .catch((err) => {
+            // Some unexpected error.
+            // For backwards compatibility reasons, if no accounts are available,
+            // eth_accounts will return an empty array.
+            console.error(err);
+    });
+
+    // Note that this event is emitted on page load.
+    // If the array of accounts is non-empty, you're already
+    // connected.
+    ethereum.on('accountsChanged', handleAccountsChanged);
+
+    // For now, 'eth_accounts' will continue to always return an array
+    function handleAccountsChanged(accounts) {
+        if (accounts.length === 0) {
+            // MetaMask is locked or the user has not connected any accounts
+            console.log('Please connect to MetaMask.');
+        } else if (accounts[0] !== currentAccount) {
+            currentAccount = accounts[0];
+            metamaskConnected.value = true;
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const balance = provider.getBalance;
+            account_balance.value = balance;
+            // Do any other work!
+        }
+    }
+
+    async function connect() {
+        const provider = await detectEthereumProvider();
+        if(!provider) {
+            showNotif('top',  { color: 'negative', message: 'Please install MetaMask!', icon: 'report_problem' })
+        }
+
+        try {
+            ethereum
+            .request({ method: 'eth_requestAccounts' })
+            .then(handleAccountsChanged)
+            .catch((err) => {
+            if (err.code === 4001) {
+                // EIP-1193 userRejectedRequest error
+                // If this happens, the user rejected the connection request.
+                showNotif('top',  { color: 'negative', message: 'Please connect to MetaMask!', icon: 'report_problem' })
+            } else {
+                console.error(err);
+                showNotif('top',  { color: 'negative', message: err.message, icon: 'report_problem' })
+            }
+        });
+        } catch (err) {
+            console.log(err)
+            showNotif('top',  { color: 'negative', message: err.message, icon: 'report_problem' })
+        }
+    }
+
+        async function mint(){
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                // validate address
+                ethers.utils.getAddress(address.value);
+                const tx = await signer.sendTransaction({
+                    to: address.value,
+                    value: ethers.utils.parseEther(`${amount.value}`)
+                })
+            } catch (err) {
+                showNotif('top',  { color: 'negative', message: err.message, icon: 'report_problem' })
+                console.log(err.message)
+            }
+        }
+
+// const chainId = await ethereum.request({method: 'eth_chainId'})
+// handleChainChanged(chainId);
+
+
+
+
+    const account_balance = ref(null);
+    const address = ref('0xd8219523af8a0f4a6b04ca11cc746d8830b07873');
+    const quantity = ref(1);
+    const amount = computed(() => quantity.value * 0.03);
+
+    function incrementQuantity () {
+        quantity.value  = quantity.value < 10 ? quantity.value+1 : quantity.value;
+    }
+
+    function decrementQuantity () {
+        quantity.value  = quantity.value > 1 ? quantity.value-1 : quantity.value;
+    }
+
+    function showNotif (position, alert) {
+        const { color, textColor, multiLine, icon, message, avatar } = alert
+        const random = Math.random() * 100
+        const buttonColor = color ? 'white' : void 0
+
+        $q.notify({
+            color,
+            textColor,
+            icon: icon,
+            message,
+            position,
+            avatar,
+            multiLine,
+            actions:  [
+                { label: 'Dismiss', color: 'yellow', handler: () => { /* console.log('wooow') */ } }
+                ]
+        })
+    }
 
 </script>
 

@@ -15,7 +15,9 @@
           ViteLiteMetaSyndicate
         </q-toolbar-title>
 
-        <q-btn class="glossy bg-grey-1 text-dark text-bold" dense rounded label="Connect Wallet" push />
+        <q-btn v-if="!connected" class="glossy bg-grey-1 text-dark text-bold" dense rounded label="Connect Wallet" push  @click="connect"/>
+
+         <q-badge rounded color="primary" :label="balance + ' Eth'" />
       </q-toolbar>
     </q-header>
 
@@ -48,6 +50,7 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
+import { ethers } from 'ethers';
 
 const linksList = [
     {
@@ -95,15 +98,62 @@ export default defineComponent({
     EssentialLink
   },
 
-  setup () {
+ setup () {
     const leftDrawerOpen = ref(false)
+    let connected = ref(false);
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const balance = ref(0)
+    // const balance = await provider.getBalance(ethereum.selectedAddress);
+    // console.log(balance)
+    if(ethereum.isConnected) {
+        connected.value = true;
+    }
+
+    async function getBalance() {
+        const balance_ = await provider.getBalance(ethereum.selectedAddress);
+        let eth = ethers.utils.formatEther(balance_._hex)
+        balance.value = eth;
+        console.log( eth );
+    }
+
+    getBalance();
+    async function connect() {
+        const provider = await detectEthereumProvider();
+        if(!provider) {
+            showNotif('top',  { color: 'negative', message: 'Please install MetaMask!', icon: 'report_problem' })
+        }
+
+        try {
+            ethereum
+            .request({ method: 'eth_requestAccounts' })
+            .then(handleAccountsChanged)
+            .catch((err) => {
+            if (err.code === 4001) {
+                // EIP-1193 userRejectedRequest error
+                // If this happens, the user rejected the connection request.
+                showNotif('top',  { color: 'negative', message: 'Please connect to MetaMask!', icon: 'report_problem' })
+            } else {
+                console.error(err);
+                showNotif('top',  { color: 'negative', message: err.message, icon: 'report_problem' })
+            }
+        });
+        } catch (err) {
+            console.log(err)
+            showNotif('top',  { color: 'negative', message: err.message, icon: 'report_problem' })
+        }
+
+        connected.value = true;
+    }
 
     return {
       essentialLinks: linksList,
       leftDrawerOpen,
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
-      }
+      },
+      connect,
+      connected,
+      balance
     }
   }
 })
