@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+    <q-header elevated class="bg-black">
       <q-toolbar>
         <q-btn
           flat
@@ -12,10 +12,10 @@
         />
 
         <q-toolbar-title>
-          Quasar App
+          ViteLiteMetaSyndicate
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <q-btn class="glossy bg-grey-1 text-dark text-bold" dense rounded label="Connect Wallet" push />
       </q-toolbar>
     </q-header>
 
@@ -50,48 +50,42 @@ import { defineComponent, ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
 
 const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
+    {
+        title: 'Road Map',
+        caption: 'road map',
+        icon: 'rss_feed',
+        link: '#road_map'
+    },
+    {
+        title: 'Nft World',
+        caption: 'Nft',
+        icon: 'rss_feed',
+        link: '#nft_world'
+    },
+    {
+        title: 'Our Kingdom',
+        caption: '',
+        icon: 'rss_feed',
+        link: '#our_kingdom'
+    },
+    {
+        title: 'Why Us',
+        caption: 'Reason to choose us',
+        icon: 'rss_feed',
+        link: '#why_us'
+    },
+    {
+        title: 'Team',
+        caption: 'Our Team',
+        icon: 'rss_feed',
+        link: '#team'
+    },
+    {
+        title: 'Faq',
+        caption: 'Frequent Questions',
+        icon: 'rss_feed',
+        link: '#faq'
+    },
 ]
 
 export default defineComponent({
