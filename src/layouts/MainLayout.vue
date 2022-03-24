@@ -17,7 +17,7 @@
 
         <q-btn v-if="!connected" class="glossy bg-grey-1 text-dark text-bold" dense rounded label="Connect Wallet" push  @click="connect"/>
 
-         <q-badge rounded color="primary" :label="balance + ' Eth'" />
+         <q-badge v-if="connected" rounded color="primary" :label="balance + ' Eth'" />
       </q-toolbar>
     </q-header>
 
@@ -110,10 +110,12 @@ export default defineComponent({
     }
 
     async function getBalance() {
-        const balance_ = await provider.getBalance(ethereum.selectedAddress);
-        let eth = ethers.utils.formatEther(balance_._hex)
-        balance.value = eth;
-        console.log( eth );
+        if(provider) {
+            const balance_ = await provider.getBalance(ethereum.selectedAddress);
+            let eth = ethers.utils.formatEther(balance_._hex)
+            balance.value = eth;
+            console.log( eth );
+        }
     }
 
     getBalance();
